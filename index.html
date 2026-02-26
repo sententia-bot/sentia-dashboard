@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SENTENTIA // ARRAKEEN CONTROL</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=JetBrains+Mono:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg-deep: #0a0e1a;
+            --bg-layer: #111827;
+            --surface: #1a2332;
+            --surface-bright: #25334a;
+            --text-primary: #e8eef7;
+            --text-secondary: #8b96a8;
+            --text-dim: #536177;
+            --accent-cyan: #00d9ff;
+            --accent-electric: #3b82f6;
+            --status-online: #00ffaa;
+            --status-offline: #ff3366;
+            --status-warn: #ffb020;
+            --glow-cyan: rgba(0, 217, 255, 0.3);
+            --glow-green: rgba(0, 255, 170, 0.25);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.4;
+            }
+        }
+
+        @keyframes scanline {
+            0% {
+                transform: translateY(-100%);
+            }
+            100% {
+                transform: translateY(200vh);
+            }
+        }
+
+        body {
+            background: 
+                radial-gradient(ellipse at 20% 30%, rgba(59, 130, 246, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 70%, rgba(0, 217, 255, 0.06) 0%, transparent 50%),
+                linear-gradient(180deg, #0a0e1a 0%, #050810 100%);
+            background-attachment: fixed;
+            color: var(--text-primary);
+            font-family: 'JetBrains Mono', monospace;
+            min-height: 100vh;
+            padding: 40px;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(
+                    0deg,
+                    transparent,
+                    transparent 2px,
+                    rgba(0, 217, 255, 0.015) 2px,
+                    rgba(0, 217, 255, 0.015) 4px
+                );
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                var(--accent-cyan) 50%, 
+                transparent 100%
+            );
+            animation: scanline 8s linear infinite;
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 10;
+        }
+
+        header {
+            margin-bottom: 60px;
+            animation: fadeInUp 0.8s ease-out;
+            position: relative;
+        }
+
+        h1 {
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            font-size: clamp(2rem, 5vw, 4rem);
+            letter-spacing: 0.05em;
+            background: linear-gradient(135deg, var(--accent-cyan) 0%, var(--accent-electric) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            position: relative;
+        }
+
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 0;
+            width: 120px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-cyan), transparent);
+            box-shadow: 0 0 10px var(--glow-cyan);
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            font-weight: 300;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .last-update {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 24px;
+            margin-bottom: 40px;
+        }
+
+        .card {
+            background: rgba(26, 35, 50, 0.5);
+            border: 1px solid var(--surface-bright);
+            border-radius: 8px;
+            padding: 28px;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+            animation: fadeInUp 0.8s ease-out;
+            animation-fill-mode: both;
+        }
+
+        .card:nth-child(1) { animation-delay: 0.1s; }
+        .card:nth-child(2) { animation-delay: 0.2s; }
+        .card:nth-child(3) { animation-delay: 0.3s; }
+
+        .card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, 
+                transparent, 
+                var(--accent-cyan), 
+                transparent
+            );
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .card:hover::before {
+            opacity: 1;
+        }
+
+        .card:hover {
+            border-color: var(--accent-cyan);
+            box-shadow: 0 8px 30px rgba(0, 217, 255, 0.15);
+            transform: translateY(-2px);
+        }
+
+        .card.online::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--status-online);
+            box-shadow: 0 0 15px var(--glow-green);
+        }
+
+        .card.offline::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--status-offline);
+            box-shadow: 0 0 15px rgba(255, 51, 102, 0.3);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 20px;
+        }
+
+        h2 {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            color: var(--text-primary);
+            text-transform: uppercase;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            position: relative;
+        }
+
+        .status-dot.online {
+            background: var(--status-online);
+            box-shadow: 0 0 10px var(--status-online);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .status-dot.offline {
+            background: var(--status-offline);
+            box-shadow: 0 0 10px var(--status-offline);
+        }
+
+        .status-indicator.online {
+            color: var(--status-online);
+        }
+
+        .status-indicator.offline {
+            color: var(--status-offline);
+        }
+
+        .card-details {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            font-size: 0.9rem;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+            font-weight: 300;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+        }
+
+        .detail-value {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .log-section {
+            animation: fadeInUp 0.8s ease-out 0.4s;
+            animation-fill-mode: both;
+        }
+
+        .log-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .log-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--accent-cyan);
+        }
+
+        .log-panel {
+            background: rgba(10, 14, 26, 0.8);
+            border: 1px solid var(--surface-bright);
+            border-radius: 8px;
+            padding: 20px;
+            max-height: 320px;
+            overflow-y: auto;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            backdrop-filter: blur(10px);
+            position: relative;
+        }
+
+        .log-panel::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .log-panel::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.02);
+            border-radius: 4px;
+        }
+
+        .log-panel::-webkit-scrollbar-thumb {
+            background: var(--accent-cyan);
+            border-radius: 4px;
+            opacity: 0.5;
+        }
+
+        .log-entry {
+            padding: 8px 12px;
+            margin-bottom: 8px;
+            border-left: 2px solid var(--surface-bright);
+            transition: all 0.2s ease;
+            background: rgba(255, 255, 255, 0.01);
+        }
+
+        .log-entry:hover {
+            background: rgba(0, 217, 255, 0.05);
+            border-left-color: var(--accent-cyan);
+        }
+
+        .timestamp {
+            color: var(--text-dim);
+            margin-right: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .log-success {
+            color: var(--status-online);
+        }
+
+        .log-warn {
+            color: var(--status-warn);
+        }
+
+        .log-error {
+            color: var(--status-offline);
+        }
+
+        .loading {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+
+        .error-banner {
+            background: rgba(255, 51, 102, 0.1);
+            border: 1px solid var(--status-offline);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            color: var(--status-offline);
+            display: none;
+        }
+
+        .error-banner.show {
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            body {
+                padding: 20px;
+            }
+
+            .grid {
+                grid-template-columns: 1fr;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Sententia Core</h1>
+            <div class="subtitle">
+                <span>Arrakeen Cluster Monitor / Status Dashboard</span>
+                <span class="last-update" id="lastUpdate">Loading...</span>
+            </div>
+        </header>
+
+        <div class="error-banner" id="errorBanner">
+            <strong>Connection Error:</strong> <span id="errorMessage"></span>
+        </div>
+
+        <div class="grid" id="nodesGrid">
+            <!-- Nodes will be dynamically populated -->
+        </div>
+
+        <div class="log-section">
+            <div class="log-header">
+                <div class="log-title">System Events</div>
+            </div>
+            <div class="log-panel" id="logPanel">
+                <!-- Logs will be dynamically populated -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';  // Use relative paths via ingress
+        
+        const REFRESH_INTERVAL = 10000; // 10 seconds
+
+        function formatTimestamp(isoString) {
+            if (!isoString) return 'Unknown';
+            const date = new Date(isoString);
+            const now = new Date();
+            const diff = now - date;
+            
+            const seconds = Math.floor(diff / 1000);
+            const minutes = Math.floor(seconds / 60);
+            const hours = Math.floor(minutes / 60);
+            const days = Math.floor(hours / 24);
+            
+            if (days > 0) return `${days}d ago`;
+            if (hours > 0) return `${hours}h ago`;
+            if (minutes > 0) return `${minutes}m ago`;
+            return `${seconds}s ago`;
+        }
+
+        function formatEventTimestamp(isoString) {
+            const date = new Date(isoString);
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            return `[${month}.${day} ${hours}:${minutes}]`;
+        }
+
+        function createNodeCard(node) {
+            const statusClass = node.status === 'online' ? 'online' : 'offline';
+            const statusText = node.status === 'online' ? 'Online' : 'Offline';
+            
+            let lastSeenText = 'Unknown';
+            if (node.status === 'online') {
+                lastSeenText = 'Active';
+            } else if (node.last_seen) {
+                lastSeenText = formatTimestamp(node.last_seen);
+            } else if (node.error) {
+                lastSeenText = 'Not in cluster';
+            }
+
+            return `
+                <div class="card ${statusClass}">
+                    <div class="card-header">
+                        <h2>${node.name.charAt(0).toUpperCase() + node.name.slice(1)}</h2>
+                        <div class="status-indicator ${statusClass}">
+                            <span class="status-dot ${statusClass}"></span>
+                            <span>${statusText}</span>
+                        </div>
+                    </div>
+                    <div class="card-details">
+                        <div class="detail-row">
+                            <span class="detail-label">Role</span>
+                            <span class="detail-value">${node.role || 'Unknown'}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">${node.status === 'online' ? 'Address' : 'Last Seen'}</span>
+                            <span class="detail-value ${node.status === 'offline' ? 'log-error' : ''}">${node.status === 'online' ? (node.ip || 'N/A') : lastSeenText}</span>
+                        </div>
+                        <div class="detail-row">
+                            <span class="detail-label">Architecture</span>
+                            <span class="detail-value">${node.arch || 'Unknown'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function getEventClass(event) {
+            if (event.type === 'Normal') return 'log-success';
+            if (event.type === 'Warning') return 'log-warn';
+            return 'log-error';
+        }
+
+        function getEventPrefix(event) {
+            if (event.type === 'Normal') return 'INFO:';
+            if (event.type === 'Warning') return 'WARNING:';
+            return 'ERROR:';
+        }
+
+        function createLogEntry(event) {
+            const eventClass = getEventClass(event);
+            const prefix = getEventPrefix(event);
+            
+            return `
+                <div class="log-entry">
+                    <span class="timestamp">${formatEventTimestamp(event.timestamp)}</span>
+                    <span class="${eventClass}">${prefix}</span> ${event.message || event.reason}
+                </div>
+            `;
+        }
+
+        async function fetchStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/api/status`);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                updateDashboard(data);
+                hideError();
+            } catch (error) {
+                console.error('Failed to fetch status:', error);
+                showError(error.message);
+            }
+        }
+
+        function updateDashboard(data) {
+            // Update nodes
+            const nodesGrid = document.getElementById('nodesGrid');
+            nodesGrid.innerHTML = data.nodes.map(node => createNodeCard(node)).join('');
+            
+            // Update logs
+            const logPanel = document.getElementById('logPanel');
+            if (data.events && data.events.length > 0) {
+                logPanel.innerHTML = data.events.map(event => createLogEntry(event)).join('');
+            } else {
+                logPanel.innerHTML = '<div class="log-entry"><span class="log-success">SYSTEM:</span> No recent events</div>';
+            }
+            
+            // Update timestamp
+            const lastUpdate = document.getElementById('lastUpdate');
+            lastUpdate.textContent = `Updated ${new Date().toLocaleTimeString()}`;
+        }
+
+        function showError(message) {
+            const banner = document.getElementById('errorBanner');
+            const messageEl = document.getElementById('errorMessage');
+            messageEl.textContent = message;
+            banner.classList.add('show');
+        }
+
+        function hideError() {
+            const banner = document.getElementById('errorBanner');
+            banner.classList.remove('show');
+        }
+
+        // Initial fetch
+        fetchStatus();
+        
+        // Refresh periodically
+        setInterval(fetchStatus, REFRESH_INTERVAL);
+    </script>
+</body>
+</html>
